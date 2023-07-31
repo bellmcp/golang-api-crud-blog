@@ -2,6 +2,7 @@ package main
 
 import (
 	"course-go/config"
+	"course-go/migrations"
 	"course-go/routes"
 	"log"
 	"os"
@@ -19,6 +20,7 @@ func main() {
 
 	config.InitDB()
 	defer config.CloseDB()
+	migrations.Migrate()
 
 	// articles
 	r := gin.Default()
