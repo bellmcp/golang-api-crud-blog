@@ -21,6 +21,7 @@ func main() {
 	config.InitDB()
 	defer config.CloseDB()
 	migrations.Migrate()
+	// seed.Load()
 
 	// articles
 	r := gin.Default()
