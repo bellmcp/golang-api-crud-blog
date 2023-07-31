@@ -44,6 +44,10 @@ type articleResponse struct {
 		ID   uint   `json:"id"`
 		Name string `json:"name"`
 	} `json:"category"`
+	User struct {
+		Name   string `json:"name"`
+		Avatar string `json:"avatar"`
+	} `json:"user"`
 }
 
 type articlesPaging struct {
@@ -57,7 +61,7 @@ func (a *Articles) FindAll(ctx *gin.Context) {
 	// a.DB.Find(&articles)
 	pagination := pagination{
 		ctx:     ctx,
-		query:   a.DB.Preload("Category").Order("id desc"),
+		query:   a.DB.Preload("User").Preload("Category").Order("id desc"),
 		records: &articles,
 	}
 	paging := pagination.paginate()
@@ -90,7 +94,9 @@ func (a *Articles) Create(ctx *gin.Context) {
 
 	// form => article
 	var article models.Article
+	user, _ := ctx.Get("sub")
 	copier.Copy(&article, &form) // must use & to refer to original data
+	article.User = *user.(*models.User)
 
 	// article => db
 	if err := a.DB.Create(&article).Error; err != nil {
@@ -176,7 +182,7 @@ func (a *Articles) findArticleByID(ctx *gin.Context) (*models.Article, error) {
 	var article models.Article
 	id := ctx.Param("id")
 
-	if err := a.DB.Preload("Category").First(&article, id).Error; err != nil {
+	if err := a.DB.Preload("User").Preload("Category").First(&article, id).Error; err != nil {
 		return nil, err
 	}
 

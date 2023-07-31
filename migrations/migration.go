@@ -14,6 +14,7 @@ func Migrate() {
 		m1690811624CreateCategoriesTable(),
 		m1690813635AddCategoryIDToArticles(),
 		m1690818012CreateUsersTable(),
+		m1690824582AddUserIDToArticles(),
 	})
 
 	if err := m.Migrate(); err != nil {
