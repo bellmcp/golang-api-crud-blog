@@ -32,14 +32,23 @@ type articleResponse struct {
 	Image   string `json:"image"`
 }
 
+type articlesPaging struct {
+	Items  []articleResponse `json:"items"`
+	Paging *pagingResult     `json:"paging"`
+}
+
 func (a *Articles) FindAll(ctx *gin.Context) {
 	var articles []models.Article
 
-	a.DB.Find(&articles)
+	// a.DB.Find(&articles)
+	paging := pagingResource(ctx, a.DB.Order("id desc"), &articles)
 
 	var serializedArticles []articleResponse
 	copier.Copy(&serializedArticles, &articles)
-	ctx.JSON(http.StatusOK, gin.H{"articles": serializedArticles})
+	ctx.JSON(http.StatusOK, gin.H{"articles": articlesPaging{
+		Items:  serializedArticles,
+		Paging: paging,
+	}})
 }
 
 func (a *Articles) FindOne(ctx *gin.Context) {
