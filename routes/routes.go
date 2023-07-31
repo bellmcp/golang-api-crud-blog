@@ -1,12 +1,14 @@
 package routes
 
 import (
+	"course-go/config"
 	"course-go/controllers"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Serve(r *gin.Engine) {
+	db := config.GetDB()
 	articlesGroup := r.Group("/api/v1/articles")
 	// GET /api/v1/articles
 	// GET /api/v1/articles/:id
@@ -14,7 +16,9 @@ func Serve(r *gin.Engine) {
 	// PATCH /api/v1/articles/:id
 	// DELETE /api/v1/articles/:id
 
-	articleController := controllers.Articles{}
+	articleController := controllers.Articles{
+		DB: db,
+	}
 
 	{
 		articlesGroup.GET("", articleController.FindAll)
