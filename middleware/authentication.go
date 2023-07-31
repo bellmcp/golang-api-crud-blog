@@ -25,6 +25,21 @@ func Authenticate() *jwt.GinJWTMiddleware {
 
 		IdentityKey: identityKey,
 
+		TokenLookup:   "header: Authorization",
+		TokenHeadName: "Bearer",
+
+		IdentityHandler: func(ctx *gin.Context) interface{} {
+			var user models.User
+			claims := jwt.ExtractClaims(ctx)
+			id := claims[identityKey]
+
+			db := config.GetDB()
+			if db.First(&user, uint(id.(float64))).RecordNotFound() {
+				return nil
+			}
+			return &user
+		},
+
 		// login -> user
 		Authenticator: func(ctx *gin.Context) (interface{}, error) {
 			var form login
