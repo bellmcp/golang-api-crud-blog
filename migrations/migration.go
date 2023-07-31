@@ -11,6 +11,7 @@ func Migrate() {
 	db := config.GetDB()
 	m := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
 		m1690787686CreateArticlesTable(),
+		m1690811624CreateCategoriesTable(),
 	})
 
 	if err := m.Migrate(); err != nil {
