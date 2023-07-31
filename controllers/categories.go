@@ -14,6 +14,15 @@ type Categories struct {
 }
 
 type categoryResponse struct {
+	Name     string `json:"name"`
+	Desc     string `json:"desc"`
+	Articles []struct {
+		ID    uint   `json:"id"`
+		Title string `json:"title"`
+	} `json:"articles"`
+}
+
+type allCategoryResponse struct {
 	Name string `json:"name"`
 	Desc string `json:"desc"`
 }
@@ -32,7 +41,7 @@ func (c *Categories) FindAll(ctx *gin.Context) {
 	var categories []models.Category
 	c.DB.Order("id desc").Find(&categories)
 
-	var serializedCategoroies []categoryResponse
+	var serializedCategoroies []allCategoryResponse
 	copier.Copy(&serializedCategoroies, &categories)
 	ctx.JSON(http.StatusOK, gin.H{"categories": serializedCategoroies})
 }
@@ -107,7 +116,7 @@ func (c *Categories) findCategoryByID(ctx *gin.Context) (*models.Category, error
 	var category models.Category
 	id := ctx.Param("id")
 
-	if err := c.DB.First(&category, id).Error; err != nil {
+	if err := c.DB.Preload("Articles").First(&category, id).Error; err != nil {
 		return nil, err
 	}
 

@@ -18,25 +18,32 @@ type Articles struct {
 }
 
 type createArticleForm struct {
-	Title   string                `form:"title" binding:"required"` // package: validator; change validate -> binding if use with gin
-	Body    string                `form:"body" binding:"required"`
-	Excerpt string                `form:"excerpt" binding:"required"`
-	Image   *multipart.FileHeader `form:"image" binding:"required"` // file
+	Title      string                `form:"title" binding:"required"` // package: validator; change validate -> binding if use with gin
+	Body       string                `form:"body" binding:"required"`
+	Excerpt    string                `form:"excerpt" binding:"required"`
+	CategoryID uint                  `form:"categoryId" binding:"required"`
+	Image      *multipart.FileHeader `form:"image" binding:"required"` // file
 }
 
 type updateArticleForm struct {
-	Title   string                `form:"title"` // package: validator; change validate -> binding if use with gin
-	Body    string                `form:"body"`
-	Excerpt string                `form:"excerpt"`
-	Image   *multipart.FileHeader `form:"image"` // file
+	Title      string                `form:"title"` // package: validator; change validate -> binding if use with gin
+	Body       string                `form:"body"`
+	Excerpt    string                `form:"excerpt"`
+	CategoryID uint                  `form:"categoryId"`
+	Image      *multipart.FileHeader `form:"image"` // file
 }
 
 type articleResponse struct {
-	ID      uint   `json:"id"`
-	Title   string `json:"title"`
-	Excerpt string `json:"excerpt"`
-	Body    string `json:"body"`
-	Image   string `json:"image"`
+	ID         uint   `json:"id"`
+	Title      string `json:"title"`
+	Excerpt    string `json:"excerpt"`
+	Body       string `json:"body"`
+	Image      string `json:"image"`
+	CategoryID uint   `json:"category_id"`
+	Category   struct {
+		ID   uint   `json:"id"`
+		Name string `json:"name"`
+	} `json:"category"`
 }
 
 type articlesPaging struct {
@@ -50,7 +57,7 @@ func (a *Articles) FindAll(ctx *gin.Context) {
 	// a.DB.Find(&articles)
 	pagination := pagination{
 		ctx:     ctx,
-		query:   a.DB.Order("id desc"),
+		query:   a.DB.Preload("Category").Order("id desc"),
 		records: &articles,
 	}
 	paging := pagination.paginate()
@@ -169,7 +176,7 @@ func (a *Articles) findArticleByID(ctx *gin.Context) (*models.Article, error) {
 	var article models.Article
 	id := ctx.Param("id")
 
-	if err := a.DB.First(&article, id).Error; err != nil {
+	if err := a.DB.Preload("Category").First(&article, id).Error; err != nil {
 		return nil, err
 	}
 
