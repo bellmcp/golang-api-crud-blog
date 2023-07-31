@@ -1,6 +1,7 @@
 package main
 
 import (
+	"course-go/config"
 	"course-go/routes"
 	"log"
 	"os"
@@ -15,6 +16,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	config.InitDB()
+	defer config.CloseDB()
 
 	// articles
 	r := gin.Default()
