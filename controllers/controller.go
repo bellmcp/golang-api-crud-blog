@@ -17,22 +17,29 @@ type pagingResult struct {
 	TotalPage int `json:"totalPage"`
 }
 
-func pagingResource(ctx *gin.Context, query *gorm.DB, records interface{}) *pagingResult {
+type pagination struct {
+	ctx     *gin.Context
+	query   *gorm.DB
+	records interface{}
+}
+
+func (p *pagination) paginate() *pagingResult {
 	// 1. get limit, page from query ?limit=10&page=2
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "12"))
+	page, _ := strconv.Atoi(p.ctx.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(p.ctx.DefaultQuery("limit", "12"))
 
 	// 2. count records
-	var count int
-	query.Model(records).Count(&count)
+	ch := make(chan int)
+	go p.countRecords(ch)
 
 	// 3. find records
 	// page => 1, 1-10, offset = 0
 	// page => 2, 11-20, offset = 10
 	offset := (page - 1) * limit
-	query.Limit(limit).Offset(offset).Find(records)
+	p.query.Limit(limit).Offset(offset).Find(p.records)
 
 	// 4. total pages
+	count := <-ch
 	totalPage := int(math.Ceil(float64(count) / float64(limit)))
 
 	// 5. find next page
@@ -52,4 +59,11 @@ func pagingResource(ctx *gin.Context, query *gorm.DB, records interface{}) *pagi
 		NextPage:  nextPage,
 		TotalPage: totalPage,
 	}
+}
+
+func (p *pagination) countRecords(ch chan int) {
+	var count int
+	p.query.Model(p.records).Count(&count)
+
+	ch <- count
 }

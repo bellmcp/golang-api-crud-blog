@@ -41,7 +41,12 @@ func (a *Articles) FindAll(ctx *gin.Context) {
 	var articles []models.Article
 
 	// a.DB.Find(&articles)
-	paging := pagingResource(ctx, a.DB.Order("id desc"), &articles)
+	pagination := pagination{
+		ctx:     ctx,
+		query:   a.DB.Order("id desc"),
+		records: &articles,
+	}
+	paging := pagination.paginate()
 
 	var serializedArticles []articleResponse
 	copier.Copy(&serializedArticles, &articles)
