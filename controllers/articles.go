@@ -50,6 +50,16 @@ type articleResponse struct {
 	} `json:"user"`
 }
 
+type createOrUpdateResponse struct {
+	ID         uint   `json:"id"`
+	Title      string `json:"title"`
+	Excerpt    string `json:"excerpt"`
+	Body       string `json:"body"`
+	Image      string `json:"image"`
+	CategoryID uint   `json:"category_id"`
+	UserID     uint   `json:"user_id"`
+}
+
 type articlesPaging struct {
 	Items  []articleResponse `json:"items"`
 	Paging *pagingResult     `json:"paging"`
@@ -106,7 +116,7 @@ func (a *Articles) Create(ctx *gin.Context) {
 
 	a.setArticleImage(ctx, &article)
 
-	serializedArticle := articleResponse{}
+	serializedArticle := createOrUpdateResponse{}
 	copier.Copy(&serializedArticle, &article)
 
 	ctx.JSON(http.StatusCreated, gin.H{"article": serializedArticle})
@@ -132,7 +142,7 @@ func (a *Articles) Update(ctx *gin.Context) {
 
 	a.setArticleImage(ctx, article)
 
-	serializedArticle := articleResponse{}
+	serializedArticle := createOrUpdateResponse{}
 	copier.Copy(&serializedArticle, &article)
 	ctx.JSON(http.StatusOK, gin.H{"article": serializedArticle})
 }
