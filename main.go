@@ -13,10 +13,12 @@ import (
 )
 
 func main() {
-	// read env variable
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("APP_ENV") != "production" {
+		// read env variable
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	config.InitDB()
