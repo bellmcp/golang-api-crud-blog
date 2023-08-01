@@ -66,7 +66,7 @@ type articlesPaging struct {
 }
 
 func (a *Articles) FindAll(ctx *gin.Context) {
-	var articles []models.Article
+	var articles []models.Article // empty slice
 
 	// /api/v1/articles?categoryId=1&term=test
 	query := a.DB.Preload("User").Preload("Category").Order("id desc")
@@ -87,10 +87,11 @@ func (a *Articles) FindAll(ctx *gin.Context) {
 	}
 	paging := pagination.paginate()
 
-	var serializedArticles []articleResponse
+	// nil slice to empty slice
+	serializedArticles := []articleResponse{}
 	copier.Copy(&serializedArticles, &articles)
 	ctx.JSON(http.StatusOK, gin.H{"articles": articlesPaging{
-		Items:  serializedArticles,
+		Items:  serializedArticles, // nil slice -> empty slice / null -> []
 		Paging: paging,
 	}})
 }

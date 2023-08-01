@@ -55,7 +55,7 @@ func (u *Users) FindAll(ctx *gin.Context) {
 	pagination := pagination{ctx: ctx, query: query, records: &users}
 	paging := pagination.paginate()
 
-	var serializedUsers []userResponse
+	serializedUsers := []userResponse{}
 	copier.Copy(&serializedUsers, &users)
 	ctx.JSON(http.StatusOK, gin.H{
 		"users": usersPaging{Items: serializedUsers, Paging: paging},
