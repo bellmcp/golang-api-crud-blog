@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -23,8 +24,13 @@ func main() {
 	migrations.Migrate()
 	// seed.Load()
 
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowAllOrigins = true           // bypass CORS policy
+	corsConfig.AddAllowHeaders("Authorization") // allow JWT to include in "Authorization" header
+
 	// articles
 	r := gin.Default()
+	r.Use(cors.New(corsConfig))
 
 	// serve static file
 	// http://localhost:8080/uploads/articles/6/bell2.png"
