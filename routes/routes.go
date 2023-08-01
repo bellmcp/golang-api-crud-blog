@@ -46,9 +46,9 @@ func Serve(r *gin.Engine) {
 		DB: db,
 	}
 	articlesGroup := v1.Group("articles")
-	articlesGroup.Use(authenticate, authorize)
 	articlesGroup.GET("", articleController.FindAll)     // skip authenticate and authorize (any user allows)
 	articlesGroup.GET("/:id", articleController.FindOne) // skip authenticate and authorize (any user allows)
+	articlesGroup.Use(authenticate, authorize)
 	{
 		articlesGroup.PATCH("/:id", articleController.Update)
 		articlesGroup.DELETE("/:id", articleController.Delete)
@@ -59,9 +59,9 @@ func Serve(r *gin.Engine) {
 		DB: db,
 	}
 	categoriesGroup := v1.Group("categories")
-	categoriesGroup.Use(authenticate, authorize)
 	categoriesGroup.GET("", categoryController.FindAll)     // skip authenticate and authorize (any user allows)
 	categoriesGroup.GET("/:id", categoryController.FindOne) // skip authenticate and authorize (any user allows)
+	categoriesGroup.Use(authenticate, authorize)
 	{
 		categoriesGroup.PATCH("/:id", categoryController.Update)
 		categoriesGroup.DELETE("/:id", categoryController.Delete)

@@ -46,6 +46,12 @@ func (u *Users) FindAll(ctx *gin.Context) {
 	var users []models.User
 	query := u.DB.Order("id desc").Find(&users)
 
+	// /api/v1/users?term=test
+	term := ctx.Query("term")
+	if term != "" {
+		query = query.Where("name ILIKE ?", "%"+term+"%") // name contains term
+	}
+
 	pagination := pagination{ctx: ctx, query: query, records: &users}
 	paging := pagination.paginate()
 

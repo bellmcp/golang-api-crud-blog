@@ -68,10 +68,21 @@ type articlesPaging struct {
 func (a *Articles) FindAll(ctx *gin.Context) {
 	var articles []models.Article
 
+	// /api/v1/articles?categoryId=1&term=test
+	query := a.DB.Preload("User").Preload("Category").Order("id desc")
+	categoryId := ctx.Query("categoryId")
+	if categoryId != "" {
+		query = query.Where("category_id = ?", categoryId)
+	}
+	term := ctx.Query("term")
+	if term != "" {
+		query = query.Where("title ILIKE ?", "%"+term+"%") // title contains term
+	}
+
 	// a.DB.Find(&articles)
 	pagination := pagination{
 		ctx:     ctx,
-		query:   a.DB.Preload("User").Preload("Category").Order("id desc"),
+		query:   query,
 		records: &articles,
 	}
 	paging := pagination.paginate()
