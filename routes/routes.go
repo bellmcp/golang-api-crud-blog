@@ -18,6 +18,7 @@ func Serve(r *gin.Engine) {
 	db := config.GetDB()
 	v1 := r.Group("/api/v1")
 	authenticate := middleware.Authenticate().MiddlewareFunc()
+	authorize := middleware.Authorize()
 
 	authGroup := v1.Group("auth")
 	authController := controllers.Auth{DB: db}
@@ -30,7 +31,7 @@ func Serve(r *gin.Engine) {
 
 	usersController := controllers.Users{DB: db}
 	usersGroup := v1.Group("users")
-	usersGroup.Use(authenticate) // apply authenticate to all routes under user group
+	usersGroup.Use(authenticate, authorize) // apply authenticate and follows by authorize to all routes under user group
 	{
 		usersGroup.GET("", usersController.FindAll)
 		usersGroup.POST("", usersController.Create)
@@ -41,25 +42,27 @@ func Serve(r *gin.Engine) {
 		usersGroup.PATCH("/:id/demote", usersController.Demote)
 	}
 
-	articlesGroup := v1.Group("articles")
 	articleController := controllers.Articles{
 		DB: db,
 	}
+	articlesGroup := v1.Group("articles")
+	articlesGroup.Use(authenticate, authorize)
+	articlesGroup.GET("", articleController.FindAll)     // skip authenticate and authorize (any user allows)
+	articlesGroup.GET("/:id", articleController.FindOne) // skip authenticate and authorize (any user allows)
 	{
-		articlesGroup.GET("", articleController.FindAll)
-		articlesGroup.GET("/:id", articleController.FindOne)
 		articlesGroup.PATCH("/:id", articleController.Update)
 		articlesGroup.DELETE("/:id", articleController.Delete)
 		articlesGroup.POST("", authenticate, articleController.Create)
 	}
 
-	categoriesGroup := v1.Group("categories")
 	categoryController := controllers.Categories{
 		DB: db,
 	}
+	categoriesGroup := v1.Group("categories")
+	categoriesGroup.Use(authenticate, authorize)
+	categoriesGroup.GET("", categoryController.FindAll)     // skip authenticate and authorize (any user allows)
+	categoriesGroup.GET("/:id", categoryController.FindOne) // skip authenticate and authorize (any user allows)
 	{
-		categoriesGroup.GET("", categoryController.FindAll)
-		categoriesGroup.GET("/:id", categoryController.FindOne)
 		categoriesGroup.PATCH("/:id", categoryController.Update)
 		categoriesGroup.DELETE("/:id", categoryController.Delete)
 		categoriesGroup.POST("", categoryController.Create)
